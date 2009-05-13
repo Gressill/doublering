@@ -1,5 +1,14 @@
 package parser;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import org.htmlparser.Node;
 import org.htmlparser.NodeFilter;
 import org.htmlparser.Parser;
@@ -19,7 +28,7 @@ public class Member extends Html{
 	 * 
 	 * private varibles 
 	 */
-	
+	private Map<String, String> _mymap;
 	/**
 	 * 
 	 * construct function
@@ -28,6 +37,7 @@ public class Member extends Html{
 	public Member(String str){
 		//parent;
 		super(str);//调用父类构造函数
+		_mymap = new HashMap<String, String>();
 	}
 	/**
 	 * 
@@ -38,7 +48,8 @@ public class Member extends Html{
 			Parser parser = new Parser(getPs());
 			HtmlPage page = new HtmlPage(parser);
 			parser.visitAllNodesWith(page);
-			System.out.println("名号： "+page.getTitle());
+			parsecommonname(page);
+			//System.out.println("名号： "+page.getTitle());
 			NodeList list = page.getBody();
 			for (NodeIterator i = list.elements(); i.hasMoreNodes(); )
 			     processMyNodes(i.nextNode());
@@ -46,17 +57,19 @@ public class Member extends Html{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+	
+	   showparse();
 	}
 	private void processMyNodes(Node node) throws ParserException
 	 {
-		 System.out.println(node.toString());
-		
+		 //System.out.println(node.toString());
 	     if (node instanceof TagNode)
 	     {
 	         // downcast to TagNode
 	         TagNode tag = (TagNode)node;
 	         parseUsernameAndCreateTime(tag);
-	         
+	         parsePlace(tag);
 	         // do whatever processing you want with the tag itself
 	         // ...
 	         // process recursively (nodes within nodes) via getChildren()
@@ -66,6 +79,18 @@ public class Member extends Html{
 	                 processMyNodes(i.nextNode());
 	     }
 	 }
+	private void showparse(){
+		for   (Object o  : _mymap.keySet()){    
+		    System.out.println(o.toString() + ": " + _mymap.get(o).toString());    
+		}
+	}
+	/**
+	 * parse commonname
+	 * @param page
+	 */
+	private void parsecommonname(HtmlPage page){
+		_mymap.put("commomname", new String(page.getTitle()));
+	}
 	
 	/**
 	 * get member usrname and login time rule.
@@ -73,34 +98,31 @@ public class Member extends Html{
 	 * @return
 	 */
 	private void parseUsernameAndCreateTime(TagNode tag){
-		System.out.println(tag.toPlainTextString());
-		if(checkByTagAndAtrr(tag,"div","class","pl")){
-			//write to the database or print on the screen.
-	        System.out.println("username及加入时间："+tag.toPlainTextString());
-		}
-	}
-	/**
-	 * checkTag
-	 * @param tag
-	 * @param tagname
-	 * @param atrrname
-	 * @param atrrvalue
-	 * @return
-	 */
-	private boolean checkByTagAndAtrr(TagNode tag, String tagname, String atrrname, String atrrvalue)
-	{
+		//System.out.println(tag.toPlainTextString());
 		String tagtext = null;
-		if(tag.getTagName().equalsIgnoreCase(tagname))
+		if(tag.getTagName().equalsIgnoreCase("div"))
         {
-       	 if(tag.getAttribute(atrrname) != null && tag.getAttribute(atrrname).equalsIgnoreCase(atrrvalue))
+       	 if(tag.getAttribute("class") != null && tag.getAttribute("class").equalsIgnoreCase("pl"))
        	 {
        		 tagtext = tag.toPlainTextString();
-       	 	 System.out.println(tagtext);
-       		 //if(tagtext.matches("id:*"))
-       	 	 return true;
+       		 if(tagtext.trim().substring(0,2).equalsIgnoreCase("id"))
+       			_mymap.put("username", tag.toPlainTextString());
        	 }
         }
-		return false;
 	}
-
+	/**
+	 * parse place 
+	 * @param tag
+	 */
+	private void parsePlace(TagNode tag){
+		String tagtext = null;
+		if(tag.getTagName().equalsIgnoreCase("a")){
+			if(tag.getAttribute("href").length()>10){
+				if(tag.getAttribute("href").substring(1,9).equalsIgnoreCase("location")){
+					//System.out.println(tag.toPlainTextString());
+					_mymap.put("place", new String(tag.toPlainTextString()));
+				}
+			}	
+		}
+	}
 }
