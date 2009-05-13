@@ -19,7 +19,21 @@ public class Html {
 		parseStr = str;
 	}
 	/**
-	 * render function
+	 * parent value return function
+	 * @return parseStr
+	 */
+	public String getPs(){
+		return parseStr;
+	}
+	/**
+	 * parent value set function
+	 * @param string
+	 */
+	public void setPs(String str){
+		parseStr = str;
+	}
+	/**
+	 * render function: 基本的解析函数
 	 * 
 	 */
 	public void render(){
