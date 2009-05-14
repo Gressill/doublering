@@ -21,6 +21,8 @@ import org.htmlparser.util.NodeList;
 import org.htmlparser.util.ParserException;
 import org.htmlparser.visitors.HtmlPage;
 
+import db.Dbo;
+
 
 public class Member extends Html{
 	
@@ -49,7 +51,6 @@ public class Member extends Html{
 			HtmlPage page = new HtmlPage(parser);
 			parser.visitAllNodesWith(page);
 			parsecommonname(page);
-			//System.out.println("ÃûºÅ£º "+page.getTitle());
 			NodeList list = page.getBody();
 			for (NodeIterator i = list.elements(); i.hasMoreNodes(); )
 			     processMyNodes(i.nextNode());
@@ -60,6 +61,7 @@ public class Member extends Html{
 		
 	
 	   showparse();
+	   store();
 	}
 	private void processMyNodes(Node node) throws ParserException
 	 {
@@ -73,9 +75,9 @@ public class Member extends Html{
 	         // do whatever processing you want with the tag itself
 	         // ...
 	         // process recursively (nodes within nodes) via getChildren()
-	         NodeList nl = tag.getChildren ();
-	         if (null != nl)
-	             for (NodeIterator i = nl.elements(); i.hasMoreNodes(); )
+	         NodeList n_inside = tag.getChildren ();
+	         if (null != n_inside)
+	             for (NodeIterator i = n_inside.elements(); i.hasMoreNodes(); )
 	                 processMyNodes(i.nextNode());
 	     }
 	 }
@@ -100,13 +102,16 @@ public class Member extends Html{
 	private void parseUsernameAndCreateTime(TagNode tag){
 		//System.out.println(tag.toPlainTextString());
 		String tagtext = null;
+		String[] gtmp = null;
 		if(tag.getTagName().equalsIgnoreCase("div"))
         {
        	 if(tag.getAttribute("class") != null && tag.getAttribute("class").equalsIgnoreCase("pl"))
        	 {
        		 tagtext = tag.toPlainTextString();
        		 if(tagtext.trim().substring(0,2).equalsIgnoreCase("id"))
-       			_mymap.put("username", tag.toPlainTextString());
+       		 	 gtmp = tag.toPlainTextString().split(" ");
+       		 	if(gtmp != null )
+       			_mymap.put("username", gtmp[1].toString());
        	 }
         }
 	}
@@ -117,12 +122,25 @@ public class Member extends Html{
 	private void parsePlace(TagNode tag){
 		String tagtext = null;
 		if(tag.getTagName().equalsIgnoreCase("a")){
-			if(tag.getAttribute("href").length()>10){
+			if(tag.getAttribute("href") != null && tag.getAttribute("href").length()>10){
 				if(tag.getAttribute("href").substring(1,9).equalsIgnoreCase("location")){
 					//System.out.println(tag.toPlainTextString());
 					_mymap.put("place", new String(tag.toPlainTextString()));
 				}
-			}	
+			}
+		}
+	}
+	/**
+	 * store the member info to database;
+	 */
+	private void store(){
+		try{
+		String sqlInsert = "INSERT INTO `dl_member`(`username`,`commomname`,`place`) VALUES ('"+
+		_mymap.get("username").toString()+"','"+_mymap.get("commomname").toString()+"','"+_mymap.get("place").toString()+"')";
+		System.out.println(sqlInsert);
+		inserSQL("dl_member","username",_mymap.get("username").toString(),sqlInsert);
+		}catch(Exception e){
+			e.printStackTrace();
 		}
 	}
 }
