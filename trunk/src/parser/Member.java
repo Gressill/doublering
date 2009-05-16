@@ -12,6 +12,8 @@ import java.util.Map;
 import org.htmlparser.Node;
 import org.htmlparser.NodeFilter;
 import org.htmlparser.Parser;
+import org.htmlparser.filters.AndFilter;
+import org.htmlparser.filters.HasAttributeFilter;
 import org.htmlparser.filters.TagNameFilter;
 import org.htmlparser.nodes.RemarkNode;
 import org.htmlparser.nodes.TagNode;
@@ -28,18 +30,12 @@ public class Member extends Html{
 	
 	/**
 	 * 
-	 * private varibles 
-	 */
-	private Map<String, String> _mymap;
-	/**
-	 * 
 	 * construct function
 	 */
 	
 	public Member(String str){
 		//parent;
 		super(str);//调用父类构造函数
-		_mymap = new HashMap<String, String>();
 	}
 	/**
 	 * 
@@ -47,45 +43,67 @@ public class Member extends Html{
 	 */
 	public void render(){
 		try{
-			Parser parser = new Parser(getPs());
+			Parser parser = new Parser(getURL());
 			HtmlPage page = new HtmlPage(parser);
 			parser.visitAllNodesWith(page);
-			parsecommonname(page);
+			parseInPage(page);
 			NodeList list = page.getBody();
-			for (NodeIterator i = list.elements(); i.hasMoreNodes(); )
-			     processMyNodes(i.nextNode());
+			processParsing(list);
 		}catch(ParserException e){
 			// TODO Auto-generated catch block
+			System.out.println("[System Info] Render function error:");
 			e.printStackTrace();
+			//return;
 		}
-		
-	
 	   showparse();
 	   store();
+	   clear();
 	}
-	private void processMyNodes(Node node) throws ParserException
+
+	private void processParsing(NodeList list){
+		try {
+			for (NodeIterator i = list.elements(); i.hasMoreNodes(); )
+			     processMyNodes(i.nextNode());
+		} catch (ParserException e) {
+			// TODO Auto-generated catch block
+			System.out.println("[System Info] Process function error:");
+			e.printStackTrace();
+		}
+	}
+	private void processMyNodes(Node node)
 	 {
 		 //System.out.println(node.toString());
 	     if (node instanceof TagNode)
 	     {
 	         // downcast to TagNode
+	    	 
 	         TagNode tag = (TagNode)node;
-	         parseUsernameAndCreateTime(tag);
-	         parsePlace(tag);
+	         parsingInTag(tag);
 	         // do whatever processing you want with the tag itself
 	         // ...
 	         // process recursively (nodes within nodes) via getChildren()
 	         NodeList n_inside = tag.getChildren ();
 	         if (null != n_inside)
-	             for (NodeIterator i = n_inside.elements(); i.hasMoreNodes(); )
-	                 processMyNodes(i.nextNode());
+				try {
+					for (NodeIterator i = n_inside.elements(); i.hasMoreNodes(); )
+					     processMyNodes(i.nextNode());
+				} catch (ParserException e) {
+					// TODO Auto-generated catch block
+					System.out.println("[System Info] Tag parsing error:");
+					e.printStackTrace();
+				}
 	     }
 	 }
-	private void showparse(){
-		for   (Object o  : _mymap.keySet()){    
-		    System.out.println(o.toString() + ": " + _mymap.get(o).toString());    
-		}
+	
+	private void parseInPage(HtmlPage page){
+		parsecommonname(page);
 	}
+	
+	private void parsingInTag(TagNode tag){
+		parseUsernameAndCreateTime(tag);
+        parsePlace(tag);
+	}
+	
 	/**
 	 * parse commonname
 	 * @param page
@@ -139,6 +157,7 @@ public class Member extends Html{
 		_mymap.get("username").toString()+"','"+_mymap.get("commomname").toString()+"','"+_mymap.get("place").toString()+"')";
 		System.out.println(sqlInsert);
 		inserSQL("dl_member","username",_mymap.get("username").toString(),sqlInsert);
+		
 		}catch(Exception e){
 			e.printStackTrace();
 		}
