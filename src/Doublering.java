@@ -21,13 +21,16 @@ public class Doublering {
 		
 		Member m = new Member("http://www.douban.com/people/");
 		String user_url = "http://www.douban.com/people/";
-//    	m.setPs(user_url+"abelfly");
+//    	m.setURL(user_url+"abelfly");
 //		m.render();
-		//从1001001用户开始访问100次用户
-		for(int i= 1001000; i<1001200; i++)
+//		Html h = new Html("http://www.douban.com/people/abelfly");
+//		h.render();
+		//从1001001用户开始访问500次用户
+		for(int i= 1000001; i<1000300; i++)
 		{	
-			m.setPs(user_url+i+"/");
+			m.setURL(user_url+i+"/");
 			m.render();
+			//sleep(100);
 		}
 		System.out.println("Spiding the member from kouban, congratulations!");
 	}
