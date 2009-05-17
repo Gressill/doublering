@@ -5,7 +5,10 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.htmlparser.Node;
 import org.htmlparser.Parser;
+import org.htmlparser.nodes.TagNode;
+import org.htmlparser.util.NodeIterator;
 import org.htmlparser.util.NodeList;
 import org.htmlparser.util.ParserException;
 
@@ -62,12 +65,51 @@ public class Html {
 			
 			Parser parser = new Parser(_url);
 			NodeList list = parser.parse (null);
+			processParsing(list);
             System.out.println (list.toHtml());
 		}
 		catch(ParserException pe){
 			pe.printStackTrace();
 		}
 		
+	}
+	
+	private void processParsing(NodeList list){
+		try {
+			for (NodeIterator i = list.elements(); i.hasMoreNodes(); )
+			     processMyNodes(i.nextNode());
+		} catch (ParserException e) {
+			// TODO Auto-generated catch block
+			System.out.println("[System Info] Process function error:");
+			e.printStackTrace();
+		}
+	}
+	private void processMyNodes(Node node)
+	 {
+		 //System.out.println(node.toString());
+	     if (node instanceof TagNode)
+	     {
+	         // downcast to TagNode
+	    	 
+	         TagNode tag = (TagNode)node;
+	         parsingInTag(tag);
+	         // do whatever processing you want with the tag itself
+	         // ...
+	         // process recursively (nodes within nodes) via getChildren()
+	         NodeList n_inside = tag.getChildren ();
+	         if (null != n_inside)
+				try {
+					for (NodeIterator i = n_inside.elements(); i.hasMoreNodes(); )
+					     processMyNodes(i.nextNode());
+				} catch (ParserException e) {
+					// TODO Auto-generated catch block
+					System.out.println("[System Info] Tag parsing error:");
+					e.printStackTrace();
+				}
+	     }
+	 }
+	private void parsingInTag(TagNode tag){
+		System.out.println(tag.toPlainTextString());
 	}
 	
 	public void showparse(){
