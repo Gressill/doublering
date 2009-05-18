@@ -6,7 +6,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
-import parser.Baseparser;
+import parser.Peopleparser;
 
 public class Parserthd extends Thread {
 	
@@ -33,10 +33,10 @@ public class Parserthd extends Thread {
 		System.out.println("[System Info] Spider people...");
 		int i=0;
 		do{
-			if(i>10)break;
+			if(i>2)break;
 			
 			try {
-				sleep(1000);
+				sleep(3000);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -46,18 +46,22 @@ public class Parserthd extends Thread {
 		
 	}
 	private void spiderpeople(){
-		Baseparser bp = new Baseparser();
+		Peopleparser p = new Peopleparser();
+		
 		int i=0;
+		int ui = 1000001;
 		
 		System.out.println("[System Info] Spider people...");
 		
 		do{
-			if(i>10)break;
+			
+			String  uid = ""+ui;
+			//if(i>40)break;
 			try {
 				
-				
-				bp.sendRE();
-				sleep(1000);
+				sleep(2000);
+				p.setURLbyId(uid);
+				p.parseUser();
 				
 				
 			} catch (IOException e) {
@@ -72,8 +76,9 @@ public class Parserthd extends Thread {
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}
+			} 
 			
+			ui++;
 			i++;
 		}while(true);
 
