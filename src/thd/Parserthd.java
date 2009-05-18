@@ -6,6 +6,10 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
+import com.mysql.jdbc.ResultSet;
+
+import db.Dbo;
+
 import parser.Peopleparser;
 
 public class Parserthd extends Thread {
@@ -49,7 +53,7 @@ public class Parserthd extends Thread {
 		Peopleparser p = new Peopleparser();
 		
 		int i=0;
-		int ui = 1000001;
+		int ui = getlastid();
 		
 		System.out.println("[System Info] Spider people...");
 		
@@ -82,6 +86,29 @@ public class Parserthd extends Thread {
 			i++;
 		}while(true);
 
+	}
+	
+	private int getlastid(){
+		Dbo db = new Dbo();
+		try{
+			
+			if(db.OpenConnection()){
+				System.out.println("[System Info] Database connected for getlastid.");
+				String getlastsql = "SELECT `douban_id` FROM `dr_user` WHERE 1 ORDER BY `id` DESC LIMIT 1";
+				ResultSet res = (ResultSet) db.ExecuteQuery(getlastsql);//S
+				//处理结果集
+				while (res.next()) {
+					int last_douban_id = res.getInt("douban_id");
+					System.out.println("[System Info] Get last id: "+last_douban_id);
+					return (int)last_douban_id;
+				}
+				}
+		}catch(Exception e){
+				e.printStackTrace();
+		}finally{
+			db.CloseConnection();
+		}
+		return (int)1000001;
 	}
 	
 }
