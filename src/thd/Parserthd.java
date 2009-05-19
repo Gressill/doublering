@@ -6,10 +6,17 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
+import com.google.gdata.client.douban.DoubanService;
+import com.google.gdata.data.Link;
+import com.google.gdata.data.TextContent;
+import com.google.gdata.data.douban.UserEntry;
+import com.google.gdata.data.douban.UserFeed;
+import com.google.gdata.util.ServiceException;
 import com.mysql.jdbc.ResultSet;
 
 import db.Dbo;
 
+import parser.Bookparser;
 import parser.Peopleparser;
 
 public class Parserthd extends Thread {
@@ -26,22 +33,54 @@ public class Parserthd extends Thread {
 		//System.out.println("subject".equals(request));
 		
 		if("people".equals(request)){
-			spiderpeople();
-			
-		}else if("subject".equals(request)){
-			spidersubject();
+			spiding_people();
+		}else if("book".equals(request)){
+			spiding_book();
+		}else if("movie".equals(request)){
+			spiding_movie();
+		}else if("music".equals(request)){
+			spiding_music();
 		}
 	}
 	
-	private void spidersubject(){
-		System.out.println("[System Info] Spider people...");
+	private void spiding_movie(){
+		//调用Bookparser来抓取、解析、储蓄书籍信息
+		System.out.println("[System Info] Spider movie...");
+	}
+	
+	private void spiding_music(){
+		//调用Musicparser来抓取、解析、储蓄书籍信息
+		System.out.println("[System Info] Spider music...");
+		
+	}
+
+	private void spiding_book(){
+		//调用Bookparser来抓取、解析、储蓄书籍信息
+		System.out.println("[System Info] Spider book...");
+		Bookparser b = new Bookparser();
+		
 		int i=0;
+		int ui = getlastid("dr_book","douban_id");
 		do{
+			String  uid = ""+ui;
 			if(i>2)break;
 			
 			try {
+				
+				b.setURLbyId(uid);
+				b.parseBook();
+				
 				sleep(3000);
 			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ParserConfigurationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (SAXException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -49,18 +88,20 @@ public class Parserthd extends Thread {
 		}while(true);
 		
 	}
-	private void spiderpeople(){
+	
+	private void spiding_people(){
+		//调用Peopleparser来抓取、解析、储蓄书籍信息
 		Peopleparser p = new Peopleparser();
 		
 		int i=0;
-		int ui = getlastid();
+		int ui = getlastid("dr_user","douban_id");
 		
 		System.out.println("[System Info] Spider people...");
 		
 		do{
 			
 			String  uid = ""+ui;
-			//if(i>40)break;
+			//if(i>2)break;
 			try {
 				
 				sleep(2000);
@@ -88,18 +129,18 @@ public class Parserthd extends Thread {
 
 	}
 	
-	private int getlastid(){
+	private int getlastid(String table, String id){
 		Dbo db = new Dbo();
 		try{
 			
 			if(db.OpenConnection()){
 				System.out.println("[System Info] Database connected for getlastid.");
-				String getlastsql = "SELECT `douban_id` FROM `dr_user` WHERE 1 ORDER BY `id` DESC LIMIT 1";
+				String getlastsql = "SELECT `"+id+"` FROM `"+table+"` WHERE 1 ORDER BY `"+id+"` DESC LIMIT 1";
 				ResultSet res = (ResultSet) db.ExecuteQuery(getlastsql);//S
 				//处理结果集
 				while (res.next()) {
-					int last_douban_id = res.getInt("douban_id");
-					System.out.println("[System Info] Get last id: "+last_douban_id);
+					int last_douban_id = res.getInt(id);
+					System.out.println("[System Info] Get last "+id+": "+last_douban_id);
 					return (int)last_douban_id;
 				}
 				}
