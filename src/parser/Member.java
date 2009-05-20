@@ -138,7 +138,7 @@ public class Member extends Html{
 	 * @param tag
 	 */
 	private void parsePlace(TagNode tag){
-		String tagtext = null;
+		//String tagtext = null;
 		if(tag.getTagName().equalsIgnoreCase("a")){
 			if(tag.getAttribute("href") != null && tag.getAttribute("href").length()>10){
 				if(tag.getAttribute("href").substring(1,9).equalsIgnoreCase("location")){
