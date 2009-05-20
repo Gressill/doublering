@@ -1,18 +1,8 @@
 package parser;
 
-import hander.BookHandler;
-
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 
-
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
-import org.xml.sax.SAXException;
+import util.Constant;
 
 import com.google.gdata.client.douban.DoubanService;
 import com.google.gdata.data.douban.Attribute;
@@ -22,47 +12,93 @@ import com.google.gdata.data.douban.Tag;
 import com.google.gdata.data.extensions.Rating;
 import com.google.gdata.util.ServiceException;
 
+import db.Dbo;
+
 
 public class Bookparser {
 	
-	private String _url = "";
-	private String _apiKey = "06d5aaf0b4b5f090148100d21e21d1b0";
-	private String _userentrylink = "http://api.douban.com/book/subject/";
-	private String bookid = new String("");
-	private String apiKey = "059ef56f6b705e1210dce04e42511a36";
-	private String secret = "006ba4a489916c13";
+	private String _apiKey = Constant.api;
+	private String _secret = Constant.secret;
+	private String bookid;
 	
 	DoubanService myService;
+	
+	private Dbo db;
+	
 	public Bookparser(){
-
-		myService = new DoubanService("subApplication", apiKey,secret);
-		
-		
-		//hander = new BookHandler();
+		//链接数据库
+		try{
+			db = new Dbo();
+			if(db.OpenConnection()){
+				System.out.println("[System Info] Database connected.");
+			}
+			//启动豆瓣服务
+			myService = new DoubanService("book", _apiKey, _secret);
+		}catch(Exception e){
+				e.printStackTrace();
+		}
 	}
 	public void setBookid(String id){
+		//设置ID
 		bookid = id;
 	}
 	public void parse(){
-		SubjectEntry subjectEntry;
-		try {
+		bookid = "2032440";
 
+		SubjectEntry subjectEntry = new SubjectEntry();
+		try {//如果抓书成功，则抓书
 			subjectEntry = myService.getBook(bookid);
-			printSubjectEntry(subjectEntry);
-
-			// tag=cowboy&start-index=1&max-results=2
-			// q=null
-			SubjectFeed subjectFeed = myService.findMovie(null, "cowboy", 1, 2);
-			for (SubjectEntry sf : subjectFeed.getEntries()) {
-				printSubjectEntry(sf);
-			}
+			analyze_and_store_book(subjectEntry);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (ServiceException e) {
-			e.printStackTrace();
+			System.out.print("[System Error] Get book failed");
+			try {//如果不成功，则抓电影
+				subjectEntry = myService.getMovie(bookid);
+				analyze_and_store_movie(subjectEntry);
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (ServiceException e1) {
+				// TODO Auto-generated catch block
+				System.out.print("[System Error] Get movie failed");
+				try {//如果不成功，则抓音乐
+					subjectEntry = myService.getMusic(bookid);
+					analyze_and_store_music(subjectEntry);
+				}catch (IOException e2) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (ServiceException e2) {
+					// TODO Auto-generated catch block
+					System.out.print("[System Error] Get music failed");
+				} 
+			}
 		}
+		
+		//printSubjectEntry(subjectEntry);
+		
 	}
-	
+	private static void analyze_and_store_book(SubjectEntry subjectEntry){
+		//获取title
+		String title   = subjectEntry.getTitle().getPlainText();
+		//获取author
+		String author  = subjectEntry.getAuthors().get(0).getName();
+		//获取summary
+		String summary = subjectEntry.getSummary().getPlainText();
+		//获取id
+		String id = subjectEntry.getId();
+		String douban_id = id.substring(id.length()-7, id.length());
+		//String douban_link = subjectEntry.getHtmlLink().getHref();
+		
+		//System.out.println(douban_link);
+	}
+	private static void analyze_and_store_movie(SubjectEntry subjectEntry){
+		
+	}
+	private static void analyze_and_store_music(SubjectEntry subjectEntry){
+		
+	}
+
 	private static void printSubjectEntry(SubjectEntry subjectEntry) {
 
 		if (subjectEntry.getSummary() != null)
@@ -88,10 +124,6 @@ public class Bookparser {
 					+ rating.getNumRaters() + " average is "
 					+ rating.getAverage());
 		System.out.println("-------------------");
-	}
-	
-	public void setURL(String url){
-		_url = url;
 	}
 	
 }
