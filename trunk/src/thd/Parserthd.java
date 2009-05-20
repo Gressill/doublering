@@ -67,23 +67,15 @@ public class Parserthd extends Thread {
 			
 			try {
 				
-				b.setURLbyId(uid);
-				b.parseBook();
+				b.setBookid(uid);
+				b.parse();
 				
 				sleep(3000);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ParserConfigurationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (SAXException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
+			ui++;
 			i++;
 		}while(true);
 		
