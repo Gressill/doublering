@@ -1,5 +1,6 @@
 
 <config>
+	<host>127.0.0.1</host>
 	<database>doublering</database>
 	<username>ctottrunsql</username>
 	<password>ctottruningsql</password>

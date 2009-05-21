@@ -26,7 +26,7 @@ public class Dbo {
 
 	public Dbo() {
 		ClassString 		= "com.mysql.jdbc.Driver";//"oracle.jdbc.driver.OracleDriver";
-		ConnectionString 	= "jdbc:mysql://localhost:3306/" + Constant.DB_DATABASE;//"jdbc:oracle:thin:@192.168.103.171:1521:jstrd";
+		ConnectionString 	= "jdbc:mysql://"+Constant.DB_HOST+":3306/" + Constant.DB_DATABASE;//"jdbc:oracle:thin:@192.168.103.171:1521:jstrd";
 		UserName 			= Constant.DB_USER_NAME;
 		PassWord 			= Constant.DB_PASSWORD;
 		}

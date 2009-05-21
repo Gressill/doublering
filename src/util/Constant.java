@@ -7,6 +7,7 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 public class Constant {
+	public  static String DB_HOST     = "127.0.0.1"; 
 	public  static String DB_DATABASE = "doublering";
 	public  static String DB_USER_NAME = "ctottrunsql";
 	public  static String DB_PASSWORD  = "ctottruningsql";
@@ -26,6 +27,7 @@ public class Constant {
 			SAXReader reader = new SAXReader();
 			Document doc = reader.read(configfile);
 			Element root = doc.getRootElement();
+			DB_HOST      = root.element("host").getTextTrim();
 			DB_DATABASE  = root.element("database").getTextTrim();
 			DB_USER_NAME = root.element("username").getTextTrim();
 			DB_PASSWORD = root.element("password").getTextTrim();
