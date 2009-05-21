@@ -6,6 +6,7 @@ import java.util.List;
 import util.Constant;
 
 import com.google.gdata.client.douban.DoubanService;
+import com.google.gdata.data.Person;
 import com.google.gdata.data.TextConstruct;
 import com.google.gdata.data.douban.Attribute;
 import com.google.gdata.data.douban.SubjectEntry;
@@ -85,7 +86,12 @@ public class Bookparser {
 		//获取title
 		title   = subjectEntry.getTitle().getPlainText();
 		//获取author
-		author  = subjectEntry.getAuthors().get(0).getName();
+		List<Person> authors = subjectEntry.getAuthors();
+		if(authors.isEmpty() == false){
+			for(Person ath : authors ){
+				author = author + "  " + ath.getName();
+			}
+		}
 		//获取summary
 		TextConstruct sbe = subjectEntry.getSummary();
 		if(sbe != null){
@@ -96,18 +102,28 @@ public class Bookparser {
 		douban_id = id.substring(id.length()-7, id.length());
 		//获取douban_link
 		douban_link = subjectEntry.getLinks().get(1).getHref();
-		//获取isbn10
-		isbn10   = subjectEntry.getAttributes().get(0).getContent();
-		//获取isbn13
-		isbn13   = subjectEntry.getAttributes().get(1).getContent();
-		//获取price
-		price    = subjectEntry.getAttributes().get(4).getContent();
-		//获取publisher
-		publisher    = subjectEntry.getAttributes().get(5).getContent();
-		//获取binding
-		binding    = subjectEntry.getAttributes().get(6).getContent();
-		//获取pubdate
-		pubdate    = subjectEntry.getAttributes().get(7).getContent();
+		
+		for (Attribute attr : subjectEntry.getAttributes()) {
+			if("isbn10".equals(attr.getName())){
+				//获取country
+				isbn10 = attr.getContent();
+			}else if("isbn13".equals(attr.getName())){
+				//获取writer
+				isbn13 = attr.getContent();
+			}else if("price".equals(attr.getName())){
+				//获取language
+				price = attr.getContent();
+			}else if("publisher".equals(attr.getName())){
+				//获取director
+				publisher = attr.getContent();
+			}else if("pubdate".equals(attr.getName())){
+				//获取pubdate
+				pubdate = attr.getContent();
+			}else if("binding".equals(attr.getName())){
+				//获取aka
+				binding = attr.getContent();
+			}
+		}
 		
 		String insert_book_sql = " INSERT INTO `"+Constant.DB_DATABASE+"`.`dr_book` "+
 			"(`title` ,`douban_id` ,`douban_link` ,`author`,`summary` ,`price` ,`publisher` ,`binding` ,`pubdate` ,`isbn10` ,`isbn13`)"+
@@ -158,7 +174,12 @@ public class Bookparser {
 		//获取title
 		title   = subjectEntry.getTitle().getPlainText();
 		//获取author
-		author  = subjectEntry.getAuthors().get(0).getName();
+		List<Person> authors = subjectEntry.getAuthors();
+		if(authors.isEmpty() == false){
+			for(Person ath : authors ){
+				author = author + "  " + ath.getName();
+			}
+		}
 		//获取summary
 		TextConstruct sbe = subjectEntry.getSummary();
 		if(sbe.isEmpty()){
@@ -251,7 +272,12 @@ public class Bookparser {
 		//获取title
 		title   = subjectEntry.getTitle().getPlainText();
 		//获取author
-		author  = subjectEntry.getAuthors().get(0).getName();
+		List<Person> authors = subjectEntry.getAuthors();
+		if(authors.isEmpty() == false){
+			for(Person ath : authors ){
+				author = author + "  " + ath.getName();
+			}
+		}
 		//获取summary
 		TextConstruct sbe = subjectEntry.getSummary();
 		if(sbe != null){
