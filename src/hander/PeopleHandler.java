@@ -98,9 +98,9 @@ public class PeopleHandler extends DefaultHandler {//ºÃ≥–DefaultHandler÷ÿ–¥start
     		if(db.OpenConnection()){
     			db.ExecuteUpdate(sqlInsert);
     		}
-    		}catch(Exception e){
+    	}catch(Exception e){
     			e.printStackTrace();
-    		}
+    	}
     }
     private void clear(){
     	_pentry.clear();
