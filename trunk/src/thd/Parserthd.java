@@ -18,6 +18,7 @@ import db.Dbo;
 
 import parser.Bookparser;
 import parser.Peopleparser;
+import util.Constant;
 
 public class Parserthd extends Thread {
 	
@@ -34,36 +35,26 @@ public class Parserthd extends Thread {
 		
 		if("people".equals(request)){
 			spiding_people();
-		}else if("book".equals(request)){
-			spiding_book();
-		}else if("movie".equals(request)){
-			spiding_movie();
-		}else if("music".equals(request)){
-			spiding_music();
+		}else if("subject".equals(request)){
+			spiding_subject();
 		}
 	}
-	
-	private void spiding_movie(){
-		//调用Bookparser来抓取、解析、储蓄书籍信息
-		System.out.println("[System Info] Spider movie...");
-	}
-	
-	private void spiding_music(){
-		//调用Musicparser来抓取、解析、储蓄书籍信息
-		System.out.println("[System Info] Spider music...");
-		
-	}
 
-	private void spiding_book(){
+	private void spiding_subject(){
 		//调用Bookparser来抓取、解析、储蓄书籍信息
-		System.out.println("[System Info] Spider book...");
-		Bookparser b = new Bookparser();
+		System.out.println("[System Info] Spiding subject...");
+		Bookparser b = new Bookparser();//book即使subject
 		
 		int i=0;
-		int ui = getlastid("dr_book","douban_id");
+		int ui = get_subject_last_id();
 		do{
+			if( ui<Constant.min_id || ui>Constant.max_id){
+				System.out.println("[System Info] Spiding out of the range, shut down!");
+				break;
+			}
 			String  uid = ""+ui;
-			if(i>2)break;
+			
+			//if(i>2)break;
 			
 			try {
 				
@@ -119,6 +110,15 @@ public class Parserthd extends Thread {
 			i++;
 		}while(true);
 
+	}
+	
+	private int get_subject_last_id(){
+		int book_last_id = getlastid("dr_book","douban_id");
+		int movie_last_id = getlastid("dr_movie","douban_id");
+		int music_last_id = getlastid("dr_music","douban_id");
+		
+		int tmp = (book_last_id > movie_last_id)? book_last_id : movie_last_id;
+		return (music_last_id > tmp)? music_last_id : tmp;
 	}
 	
 	private int getlastid(String table, String id){
