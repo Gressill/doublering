@@ -4,10 +4,10 @@
 	<database>doublering</database>
 	<username>ctottrunsql</username>
 	<password>ctottruningsql</password>
-	<spideobject>subject</spideobject>
+	<spideobject>peoplefriends</spideobject>
 	<api>
 		06d5aaf0b4b5f090148100d21e21d1b0
 		</api>
 	<secret>fe59f2f75e4332ec</secret>
 	<fromid>1000001</fromid>
-	<toid>2000000</toid></config>
+	<toid>1020000</toid></config>

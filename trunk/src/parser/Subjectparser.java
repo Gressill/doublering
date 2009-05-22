@@ -17,7 +17,7 @@ import com.google.gdata.util.ServiceException;
 import db.Dbo;
 
 
-public class Bookparser {
+public class Subjectparser {
 	
 	private String _apiKey = Constant.api;
 	private String _secret = Constant.secret;
@@ -27,7 +27,7 @@ public class Bookparser {
 	
 	private static Dbo db;
 	
-	public Bookparser(){
+	public Subjectparser(){
 		//Á´½ÓÊý¾Ý¿â
 		try{
 			db = new Dbo();
