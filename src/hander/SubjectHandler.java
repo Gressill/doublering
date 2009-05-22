@@ -8,13 +8,13 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import db.Dbo;
 
-public class BookHandler extends DefaultHandler {//¼Ì³ĞDefaultHandlerÖØĞ´startElement½âÎöXML
+public class SubjectHandler extends DefaultHandler {//¼Ì³ĞDefaultHandlerÖØĞ´startElement½âÎöXML
 
 	private Hashtable<String, String> _pentry;
 	private String cur_qName;
 	private Dbo db;
 	
-	public BookHandler(){
+	public SubjectHandler(){
 		
 		try{
 			db = new Dbo();

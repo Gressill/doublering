@@ -16,8 +16,9 @@ import com.mysql.jdbc.ResultSet;
 
 import db.Dbo;
 
-import parser.Bookparser;
+import parser.Peoplefriendsparser;
 import parser.Peopleparser;
+import parser.Subjectparser;
 import util.Constant;
 
 public class Parserthd extends Thread {
@@ -37,13 +38,21 @@ public class Parserthd extends Thread {
 			spiding_people();
 		}else if("subject".equals(request)){
 			spiding_subject();
+		}else if("peoplefriends".equals(request)){
+			spiding_peoplefriends();
 		}
+	}
+	
+	private void spiding_peoplefriends(){
+		System.out.println("[System Info] Spiding people's frinds...");
+		Peoplefriendsparser pf = new Peoplefriendsparser();//book即使subject
+		pf.parse();
 	}
 
 	private void spiding_subject(){
 		//调用Bookparser来抓取、解析、储蓄书籍信息
 		System.out.println("[System Info] Spiding subject...");
-		Bookparser b = new Bookparser();//book即使subject
+		Subjectparser b = new Subjectparser();//book即使subject
 		
 		int i=0;
 		int ui = get_subject_last_id();
@@ -127,7 +136,7 @@ public class Parserthd extends Thread {
 			
 			if(db.OpenConnection()){
 				System.out.println("[System Info] Database connected for getlastid.");
-				String getlastsql = "SELECT `"+id+"` FROM `"+table+"` WHERE 1 ORDER BY `"+id+"` DESC LIMIT 1";
+				String getlastsql = "SELECT `"+id+"` FROM `"+table+"` WHERE `douban_id`>="+Constant.min_id+" AND `douban_id`<="+Constant.max_id+" ORDER BY `"+id+"` DESC LIMIT 1";
 				ResultSet res = (ResultSet) db.ExecuteQuery(getlastsql);//S
 				//处理结果集
 				while (res.next()) {
