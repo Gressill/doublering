@@ -46,7 +46,17 @@ public class Parserthd extends Thread {
 	private void spiding_peoplefriends(){
 		System.out.println("[System Info] Spiding people's frinds...");
 		Peoplefriendsparser pf = new Peoplefriendsparser();//book¼´Ê¹subject
-		pf.parse();
+		int uid = getlastid("dr_user","douban_id");
+		do{
+			try {
+				sleep(3550);
+				pf.setUid(Integer.toString(uid));
+				uid = pf.parse();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}while(true);
 	}
 
 	private void spiding_subject(){
@@ -70,7 +80,7 @@ public class Parserthd extends Thread {
 				b.setBookid(uid);
 				b.parse();
 				
-				sleep(3000);
+				sleep(1550);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -96,7 +106,7 @@ public class Parserthd extends Thread {
 			//if(i>2)break;
 			try {
 				
-				sleep(2000);
+				sleep(1550);
 				p.setURLbyId(uid);
 				p.parseUser();
 				
@@ -150,7 +160,7 @@ public class Parserthd extends Thread {
 		}finally{
 			db.CloseConnection();
 		}
-		return (int)1000001;
+		return (int)Constant.min_id;
 	}
 	
 }

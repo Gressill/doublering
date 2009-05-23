@@ -5,9 +5,7 @@
 	<username>ctottrunsql</username>
 	<password>ctottruningsql</password>
 	<spideobject>peoplefriends</spideobject>
-	<api>
-		06d5aaf0b4b5f090148100d21e21d1b0
-		</api>
-	<secret>fe59f2f75e4332ec</secret>
+	<api>0d710ff945e1ce2e28532febd1a56a8a</api>
+	<secret>a893ec016ab25793</secret>
 	<fromid>1000001</fromid>
 	<toid>1020000</toid></config>
