@@ -50,6 +50,7 @@ public class Parserthd extends Thread {
 		do{
 			try {
 				sleep(3550);
+				System.out.println("[System Info] Spiding people and his friends: " + uid);
 				pf.setUid(Integer.toString(uid));
 				uid = pf.parse();
 			} catch (InterruptedException e) {
@@ -66,6 +67,7 @@ public class Parserthd extends Thread {
 		
 		int i=0;
 		int ui = get_subject_last_id();
+		
 		do{
 			if( ui<Constant.min_id || ui>Constant.max_id){
 				System.out.println("[System Info] Spiding out of the range, shut down!");
@@ -73,6 +75,7 @@ public class Parserthd extends Thread {
 			}
 			String  uid = ""+ui;
 			
+			System.out.println("[System Info] Spiding subject: " + uid);
 			//if(i>2)break;
 			
 			try {
@@ -103,6 +106,9 @@ public class Parserthd extends Thread {
 		do{
 			
 			String  uid = ""+ui;
+			
+			System.out.println("[System Info] Spiding people: " + uid);
+			
 			//if(i>2)break;
 			try {
 				
@@ -137,7 +143,11 @@ public class Parserthd extends Thread {
 		int music_last_id = getlastid("dr_music","douban_id");
 		
 		int tmp = (book_last_id > movie_last_id)? book_last_id : movie_last_id;
-		return (music_last_id > tmp)? music_last_id : tmp;
+		
+		int ret = (music_last_id > tmp)? music_last_id : tmp;
+		
+		System.out.println("[System Info] Get the last subject id: " + ret);
+		return ret;
 	}
 	
 	private int getlastid(String table, String id){
@@ -145,12 +155,12 @@ public class Parserthd extends Thread {
 		try{
 			
 			if(db.OpenConnection()){
-				System.out.println("[System Info] Database connected for getlastid.");
+				System.out.println("[System Info] Database connected for getlastid from "+table);
 				String getlastsql = "SELECT `"+id+"` FROM `"+table+"` WHERE `douban_id`>="+Constant.min_id+" AND `douban_id`<="+Constant.max_id+" ORDER BY `"+id+"` DESC LIMIT 1";
 				ResultSet res = (ResultSet) db.ExecuteQuery(getlastsql);//S
 				//处理结果集
 				while (res.next()) {
-					int last_douban_id = res.getInt(id);
+					int last_douban_id = res.getInt(id)+1;
 					System.out.println("[System Info] Get last "+id+": "+last_douban_id);
 					return (int)last_douban_id;
 				}
