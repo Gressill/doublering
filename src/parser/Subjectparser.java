@@ -50,33 +50,39 @@ public class Subjectparser {
 		SubjectEntry subjectEntry = new SubjectEntry();
 		try {//如果抓书成功，则抓书
 			subjectEntry = myService.getBook(bookid);
-			analyze_and_store_book(subjectEntry);
+			if(subjectEntry != null){
+				analyze_and_store_book(subjectEntry);
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (ServiceException e) {
-			System.out.println("[System Error] Get book failed, try to get movie");
+			System.out.println("\n[System Error] Get book failed, try to get movie");
 			e.printStackTrace();
 			try {//如果不成功，则抓电影
 				Thread.sleep(1500);//先暂停一秒，防止访问过量
 				subjectEntry = myService.getMovie(bookid);
-				analyze_and_store_movie(subjectEntry);
+				if(subjectEntry != null){
+					analyze_and_store_movie(subjectEntry);
+				}
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			} catch (ServiceException e1) {
 				// TODO Auto-generated catch block
 				try {//如果不成功，则抓音乐
-					System.out.println("[System Error] Get movie failed, try to get music");
+					System.out.println("\n[System Error] Get movie failed, try to get music");
 					e1.printStackTrace();
 					Thread.sleep(1500);//先暂停一秒，防止访问过量
 					subjectEntry = myService.getMusic(bookid);
-					analyze_and_store_music(subjectEntry);
+					if(subjectEntry != null){
+						analyze_and_store_music(subjectEntry);
+					}
 				}catch (IOException e2) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (ServiceException e2) {
 					// TODO Auto-generated catch block
-					System.out.println("[System Error] Get music failed");
+					System.out.println("\n[System Error] Get music failed");
 				} catch (InterruptedException e5) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -102,8 +108,9 @@ public class Subjectparser {
 				author = author + "  " + ath.getName().replace("'", "\\'");
 			}
 		}
-		//获取summary
-		TextConstruct sbe = subjectEntry.getSummary();
+		//获取summary (SUMMARY这段代码还不稳定)
+		TextConstruct sbe=null;
+		sbe = subjectEntry.getSummary();
 		if(sbe != null){
 			summary = subjectEntry.getSummary().getPlainText().replace("'", "\\'");
 		}
@@ -152,7 +159,8 @@ public class Subjectparser {
 		//将book信息写入数据库
 		store_sql(insert_book_sql);
 		
-		Rating rating = subjectEntry.getRating();
+		Rating rating = null;
+		rating = subjectEntry.getRating();
 		if(rating != null){
 			int minrate = 0; int maxrate = 0; float avgrate = 0; int ratenum = 0;
 			//获取最小评分，最大评分，平均评分，评分数量信息。
@@ -191,9 +199,11 @@ public class Subjectparser {
 			}
 		}
 		//获取summary
-		TextConstruct sbe = subjectEntry.getSummary();
-		if(sbe.isEmpty()){
+		TextConstruct sbe = null;
+		sbe = subjectEntry.getSummary();
+		if(sbe != null){
 			summary = subjectEntry.getSummary().getPlainText().replace("'", "\\'");
+			System.out.println("[System Debug] Summary is:\n"+summary);
 		}
 		//获取id,douban_id
 		id = subjectEntry.getId();
@@ -249,7 +259,8 @@ public class Subjectparser {
 		//将movie信息写入数据库
 		store_sql(insert_movie_sql);
 		
-		Rating rating = subjectEntry.getRating();
+		Rating rating = null;
+		rating = subjectEntry.getRating();
 		if(rating != null){
 			int minrate = 0; int maxrate = 0; float avgrate = 0; int ratenum = 0;
 			//获取最小评分，最大评分，平均评分，评分数量信息。
@@ -265,8 +276,9 @@ public class Subjectparser {
 		
 	
 		//再获取tag值
-		List<Tag> tags = subjectEntry.getTags();
-		if(tags.isEmpty() == false){
+		List<Tag> tags = null ;
+		tags = subjectEntry.getTags();
+		if(tags != null){
 		String insert_tag_sql = "INSERT INTO `"+Constant.DB_DATABASE+"`.`dr_subject_tag` (`tag`,`count`,`target_id`) VALUES ";
 		for (Tag tag : tags) {
 			insert_tag_sql = insert_tag_sql + "('" + tag.getName() + "','" + tag.getCount() + "','" + douban_id + "'),";
@@ -289,10 +301,11 @@ public class Subjectparser {
 			}
 		}
 		//获取summary
-		TextConstruct sbe = subjectEntry.getSummary();
+		TextConstruct sbe = null;
+		sbe = subjectEntry.getSummary();
 		if(sbe != null){
 			summary = subjectEntry.getSummary().getPlainText().replace("'", "\\'");
-			//System.out.println("[System Debug] Summary is:\n"+summary);
+			System.out.println("[System Debug] Summary is:\n"+summary);
 		}
 		//获取id,douban_id
 		id = subjectEntry.getId();
@@ -347,7 +360,8 @@ public class Subjectparser {
 		//将music信息写入数据库
 		store_sql(insert_music_sql);
 		
-		Rating rating = subjectEntry.getRating();
+		Rating rating = null;
+		rating = subjectEntry.getRating();
 		if(rating != null){
 			int minrate = 0; int maxrate = 0; float avgrate = 0; int ratenum = 0;
 			//获取最小评分，最大评分，平均评分，评分数量信息。
@@ -363,8 +377,9 @@ public class Subjectparser {
 		
 		
 		//再获取tag值
-		List<Tag> tags = subjectEntry.getTags();
-		if(tags.isEmpty() == false){
+		List<Tag> tags = null;
+		tags = subjectEntry.getTags();
+		if(tags != null){
 		String insert_tag_sql = "INSERT INTO `"+Constant.DB_DATABASE+"`.`dr_subject_tag` (`tag`,`count`,`target_id`) VALUES ";
 		for (Tag tag : tags) {
 			insert_tag_sql = insert_tag_sql + "('" + tag.getName() + "','" + tag.getCount() + "','" + douban_id + "'),";
