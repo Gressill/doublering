@@ -46,17 +46,28 @@ public class Parserthd extends Thread {
 	private void spiding_peoplefriends(){
 		System.out.println("[System Info] Spiding people's frinds...");
 		Peoplefriendsparser pf = new Peoplefriendsparser();//book即使subject
-		int uid = getlastid("dr_user","douban_id");
-		do{
+		int uid = Constant.seed;
+		int runid = 0 ;
+		int i=0;
+		do{//循环抓取用户及好友信息
+			//if(i>2)break;
 			try {
-				sleep(3550);
+				
 				System.out.println("[System Info] Spiding people and his friends: " + uid);
-				pf.setUid(Integer.toString(uid));
-				uid = pf.parse();
+				sleep(3000);
+				if(runid == 0){
+					pf.setUid(Integer.toString(uid));
+					
+				}else{
+					pf.setUid(Integer.toString(runid));
+				}
+				runid = pf.parse();
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			uid = uid +1;
+			i++;
 		}while(true);
 	}
 

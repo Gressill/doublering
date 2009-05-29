@@ -56,19 +56,13 @@ public class Peoplefriendsparser  extends Service{
 		//每读取一个entry数据，per_read增加1,当每页读取完后，如果per_page_read<max_result，这表明数据用户好友信息被读完
 		int start_index=1;
 		int max_result =50;
+		int next_id = 0;
 		try {
-			String url = Namespaces.userURL + "/" + uid  + "/friends";
-			DoubanQuery query = new DoubanQuery(new URL(url));
 			do{
 			System.out.println("[System Info] Spiding people's friends with {start_index: "+start_index+"} and {max_result: "+max_result+"}");	
 		
-			query.setStartIndex(start_index);
-			query.setMaxResults(max_result);
-			UserFeed uf = getFeed(query, UserFeed.class);
-			
-			
-			//UserFeed uf = myService.getUserFriends("1000001", 1, 2);
-			//List<UserEntry> ul = ;
+			UserFeed uf = myService.getUserFriends(uid, start_index, max_result);
+
 			String douban_uid="",title="",douban_id="",douban_link="",location_id="",location="",content="";
 			for(UserEntry u : uf.getEntries()){
 				
@@ -95,7 +89,7 @@ public class Peoplefriendsparser  extends Service{
 				String id = u.getId();
 				douban_id = id.substring(id.length()-7, id.length());
 				
-				System.out.println("[System Info] Parse ans spiding friend "+douban_id);
+				System.out.println("[System Info] Spiding friend "+douban_id);
 				//获取location_id
 				location_id = u.getLocation_id();
 				//过滤不安全数据
@@ -130,16 +124,22 @@ public class Peoplefriendsparser  extends Service{
 				String insert_friends_sql = "INSERT INTO `dr_user_friends` (`userid`,`friendid`) VALUES ('"+uid+"','"+douban_id+"')";
 				store_sql(insert_friends_sql);
 				}
+				
+				if("".equals(douban_id) == false){
+					next_id = (int)Integer.valueOf(douban_id);
+				}
 			}
 			
-			
 			if(uf.getTotalResults() <uf.getStartIndex() + max_result){
-				if("".equals(douban_id) == false){
-					return (int)Constant.min_id + (int)Math.random() * (Constant.max_id - Constant.min_id);
+				if("".equals(douban_id) == true){
+					return 0;
 				}
+				
 				else{
-					int ret =  (int)Integer.valueOf(douban_id);
- 					return ret;
+					
+					System.out.println("[System Info] next_spiding_id is: " + next_id);
+					
+					return next_id;
 				}
 			}
 			//否则，增加起始访问指标
@@ -158,12 +158,12 @@ public class Peoplefriendsparser  extends Service{
 			e.printStackTrace();
 		}
 		
-		return (int)Constant.min_id + (int)Math.random() * (Constant.max_id - Constant.min_id);
+		return 0;
 		
 	}
 	
 	private static void store_sql(String sql){
-		System.out.println("[System Info] Insert sql:\n" + sql);
+		//System.out.println("[System Info] Insert sql:\n" + sql);
 		if(db.OpenConnection()){
 			db.ExecuteUpdate(sql);
 		}

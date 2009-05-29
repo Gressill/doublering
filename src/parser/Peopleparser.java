@@ -14,11 +14,13 @@ import javax.xml.parsers.SAXParserFactory;
 
 import org.xml.sax.SAXException;
 
+import util.Constant;
+
 
 public class Peopleparser {
 	
 	private String _url = "";
-	private String _apiKey = "06d5aaf0b4b5f090148100d21e21d1b0";
+	private String _apiKey = Constant.api;
 	private String _userentrylink = "http://api.douban.com/people/";
 	private String _uid="";
 	

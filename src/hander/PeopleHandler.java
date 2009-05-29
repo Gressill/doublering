@@ -88,7 +88,7 @@ public class PeopleHandler extends DefaultHandler {//ºÃ≥–DefaultHandler÷ÿ–¥start
     	clear();
     }
     private void store(){
-    	System.out.println(_pentry.toString());
+    	//System.out.println(_pentry.toString());
     	
     	try{
     		if(_pentry.get("uid") == null) return; //ø’µƒtable£¨≤ª¥¢–Ó
@@ -111,15 +111,6 @@ public class PeopleHandler extends DefaultHandler {//ºÃ≥–DefaultHandler÷ÿ–¥start
     	_pentry.put("location_id", "");
     	_pentry.put("location", "");
     	_pentry.put("content", "");
-    	//System.out.println(_pentry);
-    	//_pentry = new Hashtable<String, String>();
-//    	for(Iterator it = _pentry.keySet().iterator();it.hasNext(); )
-//    	{  
-//            String key = (String) it.next();
-//            System.out.println(key);
-//            _pentry.remove(key);
-//            _pentry.put(key.toString(),""); 
-//    	}
     }
 
 }
