@@ -22,7 +22,9 @@ public class Subjectparser {
 	private String _apiKey = Constant.api;
 	private String _secret = Constant.secret;
 	private String bookid;
-	
+	private int[] h_type;
+	private int index=0;
+	private int h_len=10;
 	DoubanService myService;
 	
 	private static Dbo db;
@@ -34,11 +36,27 @@ public class Subjectparser {
 			if(db.OpenConnection()){
 				System.out.println("[System Info] Database connected.");
 			}
+			set_h_type(h_len);
 			//启动豆瓣服务
 			myService = new DoubanService("book", _apiKey, _secret);
 		}catch(Exception e){
 				e.printStackTrace();
 		}
+	}
+	private void set_h_type(int len){
+		h_type = new int[len];
+		for(int i=0; i<h_type.length; i++){
+			h_type[i] = 0;
+		}
+	}
+	private void set_h(int value){
+		h_type[index]=value;
+		index = (int)(index+1)%h_len;
+	}
+	private String[] h_stat(){
+		String[] order = new String[3];
+		
+		return order;
 	}
 	public void setBookid(String id){
 		//设置ID
@@ -46,6 +64,7 @@ public class Subjectparser {
 	}
 	public void parse(){
 		//bookid = "3729312";
+		
 
 		SubjectEntry subjectEntry = new SubjectEntry();
 		try {//如果抓书成功，则抓书
