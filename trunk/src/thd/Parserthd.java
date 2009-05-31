@@ -19,6 +19,7 @@ import db.Dbo;
 import parser.Peoplefriendsparser;
 import parser.Peopleparser;
 import parser.Subjectparser;
+import parser.collectionparser;
 import util.Constant;
 
 public class Parserthd extends Thread {
@@ -40,9 +41,28 @@ public class Parserthd extends Thread {
 			spiding_subject();
 		}else if("peoplefriends".equals(request)){
 			spiding_peoplefriends();
+		}else if("peoplecollection".equals(request)){
+			spiding_peoplecollection();
 		}
 	}
-	
+	private void spiding_peoplecollection(){
+		System.out.println("[System Info] Spiding people's collections...");
+		collectionparser pc= new collectionparser();
+		int uid = Constant.seed;
+		int i=0;
+		do{
+			try {
+				if(i++>2)break;
+				pc.setUid(Integer.toString(uid));
+				pc.parser();
+				sleep(1500);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			uid++;
+		}while(true);
+	}
 	private void spiding_peoplefriends(){
 		System.out.println("[System Info] Spiding people's frinds...");
 		Peoplefriendsparser pf = new Peoplefriendsparser();//book¼´Ê¹subject
