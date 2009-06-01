@@ -174,7 +174,7 @@ public class Peoplefriendsparser  extends Service{
 	}
 	
 	private static void store_sql(String sql){
-		//System.out.println("[System Info] Insert sql:\n" + sql);
+		System.out.println("[System Info] Insert sql:\n" + sql);
 		if(db.OpenConnection()){
 			db.ExecuteUpdate(sql);
 		}
