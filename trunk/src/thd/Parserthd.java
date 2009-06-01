@@ -25,10 +25,11 @@ import util.Constant;
 public class Parserthd extends Thread {
 	
 	private  String request = null; 
-	
+	private  Dbo db;
 	public Parserthd(String re){
 		super(re);
 		request = re;
+		db = new Dbo();
 		System.out.println("[System Info] Start spiding " + re);
 	}
 	public void run(){
@@ -73,20 +74,21 @@ public class Parserthd extends Thread {
 			//if(i>2)break;
 			try {
 				
-				System.out.println("[System Info] Spiding people and his friends: " + uid);
-				sleep(3000);
 				if(runid == 0){
+					System.out.println("[System Info] Spiding people "+uid+" and his friends.");
 					pf.setUid(Integer.toString(uid));
-					
+					uid = uid +1;
 				}else{
+					System.out.println("[System Info] Spiding people "+runid+" and his friends.");
 					pf.setUid(Integer.toString(runid));
 				}
 				runid = pf.parse();
+				
+				sleep(3000);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			uid = uid +1;
 			i++;
 		}while(true);
 	}
@@ -182,16 +184,15 @@ public class Parserthd extends Thread {
 	}
 	
 	private int getlastid(String table, String id){
-		Dbo db = new Dbo();
+		
 		try{
-			
 			if(db.OpenConnection()){
 				System.out.println("[System Info] Database connected for getlastid from "+table);
 				String getlastsql = "SELECT `"+id+"` FROM `"+table+"` WHERE `douban_id`>="+Constant.min_id+" AND `douban_id`<="+Constant.max_id+" ORDER BY `"+id+"` DESC LIMIT 1";
 				ResultSet res = (ResultSet) db.ExecuteQuery(getlastsql);//S
 				//处理结果集
 				while (res.next()) {
-					int last_douban_id = res.getInt(id)+1;
+					int last_douban_id = res.getInt(id);
 					System.out.println("[System Info] Get last "+id+": "+last_douban_id);
 					return (int)last_douban_id;
 				}

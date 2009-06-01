@@ -13,6 +13,7 @@ import com.google.gdata.client.douban.DoubanService;
 import com.google.gdata.data.Link;
 import com.google.gdata.data.Person;
 import com.google.gdata.data.TextConstruct;
+import com.google.gdata.data.TextContent;
 import com.google.gdata.data.douban.Attribute;
 import com.google.gdata.data.douban.Namespaces;
 import com.google.gdata.data.douban.SubjectEntry;
@@ -58,70 +59,27 @@ public class Peoplefriendsparser  extends Service{
 		int max_result =50;
 		int next_id = 0;
 		try {
+			//先抓取用户信息
+			UserEntry ue = myService.getUser(uid);
+			System.out.println("[System Info] Spinding people: " +uid);
+			parse_entry(ue);
+			
 			do{
 			System.out.println("[System Info] Spiding people's friends with {start_index: "+start_index+"} and {max_result: "+max_result+"}");	
 		
 			UserFeed uf = myService.getUserFriends(uid, start_index, max_result);
 
-			String douban_uid="",title="",douban_id="",douban_link="",location_id="",location="",content="";
+			String id="",douban_id="";
 			for(UserEntry u : uf.getEntries()){
-				
-				for(Link l : u.getLinks()){
-					
-					if("alternate".equals(l.getRel())){
-						
-						//获取douban_link
-						douban_link = u.getLinks().get(1).getHref();
-						//获取豆瓣uid
-						if(douban_link.length()>20){
-						douban_uid = douban_link.substring(douban_link.lastIndexOf("people")+7, douban_link.length()-1);
-						}
-					}
-				}
-				
-				//获取豆瓣title
-				title = u.getTitle().getPlainText();
-				//过滤不安全数据
-				if(title !=null){
-					title = title.replace("'", "\\'");
-				}
-				//获取id,douban_id
-				String id = u.getId();
+				id = u.getId();
 				douban_id = id.substring(id.length()-7, id.length());
 				
-				System.out.println("[System Info] Spiding friend "+douban_id);
-				//获取location_id
-				location_id = u.getLocation_id();
-				//过滤不安全数据
-				if(location_id != null){
-					location_id = location_id.replace("'", "\\'");
-				}
-				//获取位置
-				location=u.getLocation();
-				//过滤不安全数据
-				if(location !=null){
-					location = location.replace("'", "\\'");
-				}
-				//获取content
-				content = u.getPlainTextContent();
-				//过滤不安全数据
-				if(content !=null){
-					content = content.replace("'", "\\'");
-				}
-				//将entry信息插入user表
-				String insert_user_sql = "INSERT INTO `dr_user` (`uid`,`title`,`douban_id`,`douban_link`,`location_id`,`location`,`content`) VALUES ("
-					+"'"+douban_uid+"',"
-					+"'"+title+"',"
-					+"'"+douban_id+"',"
-					+"'"+douban_link+"',"
-					+"'"+location_id+"',"
-					+"'"+location+"',"
-					+"'"+content+"')";
-				store_sql(insert_user_sql);
+				parse_entry(u);
 				
 				if( "".equals(douban_id) == false){
 				//将关系插入user_friends表
-				String insert_friends_sql = "INSERT INTO `dr_user_friends` (`userid`,`friendid`) VALUES ('"+uid+"','"+douban_id+"')";
+				String insert_friends_sql = "INSERT INTO `dr_user_friends` (`userid`,`friendid`) VALUES ('"+uid+"','"+douban_id+"');";
+				//System.out.println("[System Info] Insert sql:\n" + insert_friends_sql);
 				store_sql(insert_friends_sql);
 				}
 				
@@ -137,15 +95,13 @@ public class Peoplefriendsparser  extends Service{
 				
 				else{
 					
-					System.out.println("[System Info] next_spiding_id is: " + next_id);
-					
 					return next_id;
 				}
 			}
 			//否则，增加起始访问指标
 			start_index = uf.getStartIndex() + max_result;
 			//停止1.5秒
-			Thread.sleep(2550);
+			Thread.sleep(3000);
 			}while(true);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -160,6 +116,61 @@ public class Peoplefriendsparser  extends Service{
 		
 		return 0;
 		
+	}
+	
+	private static void parse_entry(UserEntry ue){
+		String douban_uid="",title="",douban_id="",douban_link="",location_id="",location="",content="";
+		for(Link l : ue.getLinks()){
+			
+			if("alternate".equals(l.getRel())){
+				
+				//获取douban_link
+				douban_link = ue.getLinks().get(1).getHref();
+				//获取豆瓣uid
+				if(douban_link.length()>20){
+					douban_uid = douban_link.substring(douban_link.lastIndexOf("people")+7, douban_link.length()-1);
+				}
+			}
+		}
+		
+		//获取豆瓣title
+		title = ue.getTitle().getPlainText();
+		//过滤不安全数据
+		if(title !=null){
+			title = title.replace("'", "\\'");
+		}
+		//获取id,douban_id
+		String id = ue.getId();
+		douban_id = id.substring(id.length()-7, id.length());
+		
+		//System.out.println("[System Info] Spiding friend "+douban_id);
+		//获取location_id
+		location_id = ue.getLocation_id();
+		//过滤不安全数据
+		if(location_id != null){
+			location_id = location_id.replace("'", "\\'");
+		}
+		//获取位置
+		location=ue.getLocation();
+		//过滤不安全数据
+		if(location !=null){
+			location = location.replace("'", "\\'");
+		}
+		//获取content
+		content = ue.getPlainTextContent();
+		//过滤不安全数据
+		if(content !=null){
+			content = content.replace("'", "\\'");
+		}
+		String insert_user_sql = "INSERT INTO `dr_user` (`uid`,`title`,`douban_id`,`douban_link`,`location_id`,`location`,`content`) VALUES ("
+			+"'"+douban_uid+"',"
+			+"'"+title+"',"
+			+"'"+douban_id+"',"
+			+"'"+douban_link+"',"
+			+"'"+location_id+"',"
+			+"'"+location+"',"
+			+"'"+content+"')";
+		store_sql(insert_user_sql);
 	}
 	
 	private static void store_sql(String sql){
