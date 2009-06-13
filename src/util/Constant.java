@@ -11,6 +11,7 @@ public class Constant {
 	public  static String DB_DATABASE = "doublering";
 	public  static String DB_USER_NAME = "ctottrunsql";
 	public  static String DB_PASSWORD  = "ctottruningsql";
+	public  static String virtualmachine = "";
 	public  static String spideobject;
 	public  static String api;
 	public  static String secret;
@@ -32,6 +33,7 @@ public class Constant {
 			DB_DATABASE  = root.element("database").getTextTrim();
 			DB_USER_NAME = root.element("username").getTextTrim();
 			DB_PASSWORD = root.element("password").getTextTrim();
+			virtualmachine = root.element("virtualmachine").getTextTrim();
 			spideobject = root.element("spideobject").getTextTrim();
 			api         = root.element("api").getTextTrim();
 			secret      = root.element("secret").getTextTrim();

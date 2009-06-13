@@ -1,17 +1,13 @@
 package thd;
 
 import java.io.IOException;
+import java.util.Hashtable;
+import java.util.Random;
 
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
-import com.google.gdata.client.douban.DoubanService;
-import com.google.gdata.data.Link;
-import com.google.gdata.data.TextContent;
-import com.google.gdata.data.douban.UserEntry;
-import com.google.gdata.data.douban.UserFeed;
-import com.google.gdata.util.ServiceException;
 import com.mysql.jdbc.ResultSet;
 
 import db.Dbo;
@@ -26,15 +22,18 @@ public class Parserthd extends Thread {
 	
 	private  String request = null; 
 	private  Dbo db;
+	private  Random generator;
 	public Parserthd(String re){
 		super(re);
 		request = re;
 		db = new Dbo();
+		generator = new Random();
 		System.out.println("[System Info] Start spiding " + re);
 	}
 	public void run(){
 		
 		//System.out.println("subject".equals(request));
+		
 		
 		if("people".equals(request)){
 			spiding_people();
@@ -49,47 +48,59 @@ public class Parserthd extends Thread {
 	private void spiding_peoplecollection(){
 		System.out.println("[System Info] Spiding people's collections...");
 		collectionparser pc= new collectionparser();
-		int uid = Constant.seed;
-		int i=0;
+		Hashtable<String, Integer> last_info = get_info(Constant.virtualmachine,Constant.spideobject);
+		int position = last_info.get("current_position");
+		int from = last_info.get("from");
+		int to = last_info.get("to");
 		do{
-			try {
-				if(i++>2)break;
-				pc.setUid(Integer.toString(uid));
-				pc.parser();
-				sleep(1500);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			if(position<=from && position>=to){
+				System.out.println("[System Info] Spiding out of range.");
 			}
-			uid++;
-		}while(true);
-	}
-	private void spiding_peoplefriends(){
-		System.out.println("[System Info] Spiding people's frinds...");
-		Peoplefriendsparser pf = new Peoplefriendsparser();//book即使subject
-		int uid = Constant.seed;
-		int runid = 0 ;
-		int i=0;
-		do{//循环抓取用户及好友信息
-			//if(i>2)break;
+			if(position%10 == 0){
+				System.out.println("[System Info] Update current_position to database.");
+				update_position(Constant.virtualmachine,Constant.spideobject,Integer.toString(position));
+			}
 			try {
-				
-				if(runid == 0){
-					System.out.println("[System Info] Spiding people "+uid+" and his friends.");
-					pf.setUid(Integer.toString(uid));
-					uid = uid +1;
-				}else{
-					System.out.println("[System Info] Spiding people "+runid+" and his friends.");
-					pf.setUid(Integer.toString(runid));
-				}
-				runid = pf.parse();
-				
+				//if(i++>2)break;
+				pc.setUid(Integer.toString(position));
+				pc.parser();
 				sleep(3000);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			i++;
+			position++;
+		}while(true);
+	}
+	private void spiding_peoplefriends(){
+		System.out.println("[System Info] Spiding people's frinds...");
+		Peoplefriendsparser pf = new Peoplefriendsparser();//book即使subject
+		Hashtable<String, Integer> last_info = get_info(Constant.virtualmachine,Constant.spideobject);
+		int position = last_info.get("current_position");
+		int from = last_info.get("from");
+		int to = last_info.get("to");
+		do{//循环抓取用户及好友信息
+			//if(i>2)break;
+			if(position<=from && position>=to){
+				System.out.println("[System Info] Spiding out of range.");
+			}
+			if(position%10 == 0){
+				System.out.println("[System Info] Update current_position to database.");
+				update_position(Constant.virtualmachine,Constant.spideobject,Integer.toString(position));
+			}
+			try {
+				
+			System.out.println("[System Info] Spiding people "+position+" and his friends.");
+			pf.setUid(Integer.toString(position));
+			pf.parse();
+			
+			sleep(3000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			position++;
 		}while(true);
 	}
 
@@ -203,6 +214,45 @@ public class Parserthd extends Thread {
 			db.CloseConnection();
 		}
 		return (int)Constant.min_id;
+	}
+	private Hashtable<String, Integer> get_info(String virtualmachine, String type){
+		Hashtable<String, Integer> info = new Hashtable<String, Integer>();
+		try{
+			if(db.OpenConnection()){
+				System.out.println("[System Info] Get the last id from machine "+ virtualmachine+", spiding type is "+type);
+				String get_info = "SELECT * FROM `dr_spiding_stat` WHERE `virtualmachine`='"+virtualmachine+"' AND `type`='"+type+"'";
+				System.out.println("[System Info] get_info sql is: "+get_info);
+				ResultSet res = (ResultSet) db.ExecuteQuery(get_info);
+				while (res.next()){
+					int current_position = res.getInt("current_position");
+					info.put("current_position", new Integer(current_position));
+					int from  = res.getInt("from");
+					info.put("from", from);
+					info.put("to", res.getInt("to"));
+					System.out.println("[System Info] Get current postion: "+current_position);
+					return info;
+				}
+			}
+		}catch(Exception e){
+				e.printStackTrace();
+		}finally{
+			//db.CloseConnection();
+		}
+		return info;
+	}
+	
+	private void update_position(String virtualmachine, String type, String position){
+		try{
+			if(db.OpenConnection()){
+				System.out.println("[System Info] Update the last id from machine "+ virtualmachine+", spiding type is "+type);
+				String update_position = "UPDATE `dr_spiding_stat` SET `current_position`='"+position+"' WHERE `virtualmachine`='"+virtualmachine+"' AND `type`='"+type+"'";
+				db.ExecuteUpdate(update_position);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}finally{
+			//db.CloseConnection();
+		}	
 	}
 	
 }

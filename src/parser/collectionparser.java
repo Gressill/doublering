@@ -51,10 +51,17 @@ public class collectionparser {
 	public void parser(){
 		
 		try {
+			UserEntry u_me = myService.getUser(uid);
+			System.out.println("[System Info] Spinding people: " +uid);
+			if(u_me == null){
+				return;
+			}
+			parse_entry(u_me);
+			Thread.sleep(2000);
 			parse_subject("book");
-			Thread.sleep(1500);
+			Thread.sleep(2000);
 			parse_subject("music");
-			Thread.sleep(1500);
+			Thread.sleep(2000);
 			parse_subject("movie");
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
@@ -67,20 +74,75 @@ public class collectionparser {
 			e.printStackTrace();
 		}
 	}
+	private static void parse_entry(UserEntry ue){
+		String douban_uid="",title="",douban_id="",douban_link="",location_id="",location="",content="";
+		for(Link l : ue.getLinks()){
+			
+			if("alternate".equals(l.getRel())){
+				
+				//获取douban_link
+				douban_link = ue.getLinks().get(1).getHref();
+				//获取豆瓣uid
+				if(douban_link.length()>20){
+					douban_uid = douban_link.substring(douban_link.lastIndexOf("people")+7, douban_link.length()-1);
+				}
+			}
+		}
+		
+		//获取豆瓣title
+		title = ue.getTitle().getPlainText();
+		//过滤不安全数据
+		if(title !=null){
+			title = title.replace("'", "\\'");
+		}
+		//获取id,douban_id
+		String id = ue.getId();
+		douban_id = id.substring(id.length()-7, id.length());
+		
+		//System.out.println("[System Info] Spiding friend "+douban_id);
+		//获取location_id
+		location_id = ue.getLocation_id();
+		//过滤不安全数据
+		if(location_id != null){
+			location_id = location_id.replace("'", "\\'");
+		}
+		//获取位置
+		location=ue.getLocation();
+		//过滤不安全数据
+		if(location !=null){
+			location = location.replace("'", "\\'");
+		}
+		//获取content
+		content = ue.getPlainTextContent();
+		//过滤不安全数据
+		if(content !=null){
+			content = content.replace("'", "\\'");
+		}
+		String insert_user_sql = "INSERT INTO `dr_user` (`uid`,`title`,`douban_id`,`douban_link`,`location_id`,`location`,`content`) VALUES ("
+			+"'"+douban_uid+"',"
+			+"'"+title+"',"
+			+"'"+douban_id+"',"
+			+"'"+douban_link+"',"
+			+"'"+location_id+"',"
+			+"'"+location+"',"
+			+"'"+content+"')";
+		store_sql(insert_user_sql);
+	}
 	private  void parse_subject(String type) throws IOException, ServiceException, InterruptedException{
 		int start_index=1;
-		int max_result =5;
-		
+		int max_result =50;
+		System.out.println("[System Info] Spiding user's " + type);
 		do{
 			CollectionFeed cf = myService.getUserCollections(uid, type, null, null, start_index, max_result);
 			for (CollectionEntry ce : cf.getEntries()) {
 				parseCollectionEntry(ce,uid,type);//
 			}
-			if(cf.getTotalResults() <cf.getStartIndex() + max_result){
-				break;
-			}
+			
 			//否则，增加起始访问指标
 			start_index = cf.getStartIndex() + max_result;
+			if(cf.getTotalResults() < start_index){
+				break;
+			}
 			Thread.sleep(2000);
 		}while(true);
 	}
@@ -92,10 +154,10 @@ public class collectionparser {
 		
 		
 		String collection_id   = ce.getId();
-		collection_id = collection_id.substring(collection_id.lastIndexOf("collection")+11,collection_id.length()-1);
+		collection_id = collection_id.substring(collection_id.lastIndexOf("collection")+11,collection_id.length());
 		String user_id = uid;
 		String subject_id = sub.getId();
-		subject_id = subject_id.substring(subject_id.lastIndexOf("subject")+8, subject_id.length()-1);
+		subject_id = subject_id.substring(subject_id.lastIndexOf("subject")+8, subject_id.length());
 		String type = typ;
 		String title = ce.getTitle().getPlainText().replace("'", "\\'");
 		String status = ce.getStatus().getContent();
@@ -115,11 +177,12 @@ public class collectionparser {
 		}else if("music".equals(typ)){
 			analyze_and_store_music(sub);
 		}else if("movie".equals(typ)){
-			analyze_and_store_music(sub);
+			analyze_and_store_movie(sub);
 		}
 	}
 
 	private static void analyze_and_store_book(Subject subjectEntry){
+		if(subjectEntry == null)return;
 		String title ="", author ="", summary ="", id="", douban_id="",douban_link="",isbn10="",isbn13="",price="";
 		String publisher = "", binding="",pubdate="";
 		//获取title
@@ -142,8 +205,9 @@ public class collectionparser {
 		douban_id = id.substring(id.length()-7, id.length());
 		//获取douban_link
 		douban_link = subjectEntry.getLinks().get(1).getHref();
-		
-		for (Attribute attr : subjectEntry.getAttributes()) {
+		List<Attribute> attrs = subjectEntry.getAttributes();
+		if(attrs == null)return;
+		for (Attribute attr : attrs) {
 			if("isbn10".equals(attr.getName())){
 				//获取country
 				isbn10 = attr.getContent().replace("'", "\\'");
@@ -215,6 +279,7 @@ public class collectionparser {
 		}
 	}
 	private static void analyze_and_store_movie(Subject subjectEntry){
+		if(subjectEntry == null)return;
 		String title ="", author ="", summary ="", id="", douban_id="",douban_link="";
 		//获取title
 		title   = subjectEntry.getTitle().getPlainText().replace("'", "\\'");
@@ -239,7 +304,9 @@ public class collectionparser {
 		douban_link = subjectEntry.getLinks().get(1).getHref();
 		//处理attributes
 		String writer="",language="",cast="",country="",director="",pubdate="",aka="",imdb="";
-		for (Attribute attr : subjectEntry.getAttributes()) {
+		List<Attribute> attrs = subjectEntry.getAttributes();
+		if(attrs == null)return;
+		for (Attribute attr : attrs) {
 			if("country".equals(attr.getName())){
 				//获取country
 				country = attr.getContent().replace("'", "\\'");
@@ -320,6 +387,7 @@ public class collectionparser {
 		}
 	}
 	private static void analyze_and_store_music(Subject subjectEntry){
+		if(subjectEntry == null)return;
 		String title ="", author ="", summary ="", id="", douban_id="",douban_link="";
 		//获取title
 		title   = subjectEntry.getTitle().getPlainText().replace("'", "\\'");
@@ -344,7 +412,9 @@ public class collectionparser {
 		douban_link = subjectEntry.getLinks().get(1).getHref();
 		//处理attributes
 		String ean="",tracks="",cast="",discs="",media="",pubdate="",aka="",singer="";
-		for (Attribute attr : subjectEntry.getAttributes()) {
+		List<Attribute> attrs = subjectEntry.getAttributes();
+		if(attrs == null)return;
+		for (Attribute attr : attrs) {
 			if("discs".equals(attr.getName())){
 				//获取discs
 				discs = attr.getContent().replace("'", "\\'");
