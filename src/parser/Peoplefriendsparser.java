@@ -86,7 +86,7 @@ public class Peoplefriendsparser  extends Service{
 				break;
 			}
 			//Õ£÷π1.5√Î
-			Thread.sleep(3000);
+			Thread.sleep(Constant.sleep);
 			}while(true);
 			
 			if(uf == null || douban_id_list==null || douban_id_list.isEmpty() ==true)

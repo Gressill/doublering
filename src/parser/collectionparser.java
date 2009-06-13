@@ -57,11 +57,11 @@ public class collectionparser {
 				return;
 			}
 			parse_entry(u_me);
-			Thread.sleep(2000);
+			Thread.sleep(Constant.sleep);
 			parse_subject("book");
-			Thread.sleep(2000);
+			Thread.sleep(Constant.sleep);
 			parse_subject("music");
-			Thread.sleep(2000);
+			Thread.sleep(Constant.sleep);
 			parse_subject("movie");
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
@@ -143,7 +143,7 @@ public class collectionparser {
 			if(cf.getTotalResults() < start_index){
 				break;
 			}
-			Thread.sleep(2000);
+			Thread.sleep(Constant.sleep);
 		}while(true);
 	}
 

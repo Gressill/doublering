@@ -64,7 +64,7 @@ public class Parserthd extends Thread {
 				//if(i++>2)break;
 				pc.setUid(Integer.toString(position));
 				pc.parser();
-				sleep(3000);
+				sleep(Constant.sleep);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -94,7 +94,7 @@ public class Parserthd extends Thread {
 			pf.setUid(Integer.toString(position));
 			pf.parse();
 			
-			sleep(3000);
+			sleep(Constant.sleep);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
