@@ -1,26 +1,20 @@
 package parser;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import util.Constant;
 
 import com.google.gdata.client.Service;
-import com.google.gdata.client.douban.DoubanQuery;
+
 import com.google.gdata.client.douban.DoubanService;
 import com.google.gdata.data.Link;
-import com.google.gdata.data.Person;
-import com.google.gdata.data.TextConstruct;
-import com.google.gdata.data.TextContent;
-import com.google.gdata.data.douban.Attribute;
-import com.google.gdata.data.douban.Namespaces;
-import com.google.gdata.data.douban.SubjectEntry;
-import com.google.gdata.data.douban.Tag;
+
 import com.google.gdata.data.douban.UserEntry;
 import com.google.gdata.data.douban.UserFeed;
-import com.google.gdata.data.extensions.Rating;
+
 import com.google.gdata.util.ServiceException;
 
 import db.Dbo;
@@ -34,10 +28,13 @@ public class Peoplefriendsparser  extends Service{
 	
 	private static Dbo db;
 	
+	private  Random generator;
+	
 	public Peoplefriendsparser(){
 		//链接数据库
 		try{
 			db = new Dbo();
+			generator = new Random();
 			if(db.OpenConnection()){
 				System.out.println("[System Info] Database connected.");
 			}
@@ -53,56 +50,53 @@ public class Peoplefriendsparser  extends Service{
 	}
 	
 	public int parse(){
-		
 		//每读取一个entry数据，per_read增加1,当每页读取完后，如果per_page_read<max_result，这表明数据用户好友信息被读完
 		int start_index=1;
 		int max_result =50;
-		int next_id = 0;
+		
 		try {
 			//先抓取用户信息
-			UserEntry ue = myService.getUser(uid);
+			UserEntry u_me = myService.getUser(uid);
 			System.out.println("[System Info] Spinding people: " +uid);
-			parse_entry(ue);
+			parse_entry(u_me);
 			
+			
+			UserFeed uf=null;
+			List<String> douban_id_list = new ArrayList<String>(); 
 			do{
 			System.out.println("[System Info] Spiding people's friends with {start_index: "+start_index+"} and {max_result: "+max_result+"}");	
-		
-			UserFeed uf = myService.getUserFriends(uid, start_index, max_result);
-
+			uf = myService.getUserFriends(uid, start_index, max_result);
 			String id="",douban_id="";
 			for(UserEntry u : uf.getEntries()){
 				id = u.getId();
 				douban_id = id.substring(id.length()-7, id.length());
-				
+				//put douban_id to list
+				douban_id_list.add(douban_id);
 				parse_entry(u);
 				
-				if( "".equals(douban_id) == false){
-				//将关系插入user_friends表
 				String insert_friends_sql = "INSERT INTO `dr_user_friends` (`userid`,`friendid`) VALUES ('"+uid+"','"+douban_id+"');";
 				//System.out.println("[System Info] Insert sql:\n" + insert_friends_sql);
 				store_sql(insert_friends_sql);
-				}
-				
-				if("".equals(douban_id) == false){
-					next_id = (int)Integer.valueOf(douban_id);
-				}
 			}
 			
-			if(uf.getTotalResults() <uf.getStartIndex() + max_result){
-				if("".equals(douban_id) == true){
-					return 0;
-				}
-				
-				else{
-					
-					return next_id;
-				}
-			}
 			//否则，增加起始访问指标
 			start_index = uf.getStartIndex() + max_result;
+			System.out.println("[System Info] The user has "+uf.getTotalResults()+" friends.");
+			if(uf.getTotalResults() < start_index){
+				break;
+			}
 			//停止1.5秒
 			Thread.sleep(3000);
 			}while(true);
+			
+			if(uf == null || douban_id_list==null || douban_id_list.isEmpty() ==true)
+				return 0;
+			//randomly return a value;
+			String runid = douban_id_list.get(generator.nextInt(uf.getTotalResults()));
+			
+			System.out.println(runid);
+			return Integer.parseInt(runid);
+			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -115,7 +109,6 @@ public class Peoplefriendsparser  extends Service{
 		}
 		
 		return 0;
-		
 	}
 	
 	private static void parse_entry(UserEntry ue){

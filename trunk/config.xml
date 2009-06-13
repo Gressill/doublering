@@ -1,13 +1,14 @@
-
 <config>
 	<host>127.0.0.1</host>
 	<database>doublering</database>
 	<username>ctottrunsql</username>
+	<virtualmachine>zf1</virtualmachine>
 	<password>ctottruningsql</password>
-	<spideobject>peoplecollection</spideobject><!--spideobject assigns the type of data, which should only be 'people','subject','peoplefriends','peoplecollection' and so on. Notice that you should assign other parameters.-->
+	<spideobject>peoplefriends</spideobject><!--spideobject assigns the type of data, which should only be 'people','subject','peoplefriends','peoplecollection' and so on. Notice that you should assign other parameters.-->
 	<api>0db84fa1de641fab2928eee59b2c5f01</api>
 	<secret>69e48b6a408a16a7</secret>
-	<fromid>1000002</fromid>
-	<toid>2100000</toid><!--fromid and toid limit the range of the object id, useful when spideobject is 'people','subject'-->
+	<fromid>1000001</fromid>
+	<toid>1050000</toid><!--fromid and toid limit the range of the object id, useful when spideobject is 'people','subject'-->
 	<seed>1000500</seed><!--seed is only used when the spideobject is 'peoplefriends',seed should be a small id which has a large number of friends.-->
+	<max_lay>5</max_lay><!--max_lay is the max lay to be searched.-->
 </config>
