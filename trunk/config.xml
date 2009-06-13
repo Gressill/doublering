@@ -4,7 +4,8 @@
 	<username>ctottrunsql</username>
 	<virtualmachine>zf1</virtualmachine>
 	<password>ctottruningsql</password>
-	<spideobject>peoplefriends</spideobject><!--spideobject assigns the type of data, which should only be 'people','subject','peoplefriends','peoplecollection' and so on. Notice that you should assign other parameters.-->
+	<spideobject>peoplefriends</spideobject>
+	<sleep>2000</sleep><!--spideobject assigns the type of data, which should only be 'people','subject','peoplefriends','peoplecollection' and so on. Notice that you should assign other parameters.-->
 	<api>0db84fa1de641fab2928eee59b2c5f01</api>
 	<secret>69e48b6a408a16a7</secret>
 	<fromid>1000001</fromid>

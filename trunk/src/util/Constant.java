@@ -18,6 +18,7 @@ public class Constant {
 	public  static int    min_id;
 	public  static int    max_id;
 	public  static int    seed;
+	public  static int    sleep;
 	
 	public static boolean initGameFromXml() {
 		// long lasting = System.currentTimeMillis();
@@ -40,6 +41,7 @@ public class Constant {
 			min_id      = new Integer(root.element("fromid").getTextTrim());
 			max_id      = new Integer(root.element("toid").getTextTrim());
 			seed        = new Integer(root.element("seed").getTextTrim());
+			sleep        = new Integer(root.element("sleep").getTextTrim());
 			//System.out.println("port:" + port + "\ndatabase" + DB__DATABASE+ "\nusername:" + DB_USER_NAME + "\npassword:" + DB_PASSWORD);
 			System.out.println("[System Msgs]: Load config file succeed. The config argument is: ");
 			System.out.println("DATABASE: "+DB_DATABASE+"\n DB_USER_NAME: "+DB_USER_NAME+"\n DB_PASSWORD: "+DB_PASSWORD+"\n Spideobject: "+spideobject);
